@@ -1,2 +1,11 @@
-# hello-world
-Hello world new project template.
+框架:
+1、UI管理
+2、登录
+3、websocket
+4、http
+5、帧同步
+6、读取json配置表管理器
+7、创建房间，加入房间
+
+需求:
+1、不使用全局变量
