@@ -34,5 +34,6 @@ export default class UIBase extends cc.Component {
 
     hide() {
         this.node.active = false;
+        // TODO:这里加入事件解除绑定
     }
 }

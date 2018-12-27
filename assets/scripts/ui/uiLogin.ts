@@ -8,7 +8,11 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class uiLogin extends UIBase {
-    start () {
+    onLoad() {
+        super.onLoad();
         this.nodeDict["start"].on("click", window.Game.GameManager.matchVsInit, window.Game.GameManager);
+    }
+
+    start () {
     }
 }
