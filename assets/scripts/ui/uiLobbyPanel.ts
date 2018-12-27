@@ -4,6 +4,7 @@
 
 import UIBase from "../base/UIBase";
 import UIManager from "../common/UIManager";
+import G from "../common/Globals";
 
 
 const { ccclass, property } = cc._decorator;
@@ -19,7 +20,15 @@ export default class uiLobbyPanel extends UIBase {
     }
 
     start() {
-        
+    }
+
+    onEnable() {
+    }
+
+    onDisable() {
+    }
+
+    onDestroy() {
     }
 
     createRoom() {
@@ -32,9 +41,9 @@ export default class uiLobbyPanel extends UIBase {
 
     randomRoom() {
         // Game.GameManager.blockInput();
-        window.GLB.matchType = window.GLB.RANDOM_MATCH; // 修改匹配方式为随机匹配
+        G.GLB.matchType = G.GLB.RANDOM_MATCH; // 修改匹配方式为随机匹配
         console.log('开始随机匹配');
-        if (window.GLB.gameType === window.GLB.COOPERATION) {
+        if (G.GLB.gameType === G.GLB.COOPERATION) {
             // if (window.GLB.MAX_PLAYER_COUNT > 1) {
             //     if (cc.Canvas.instance.designResolution.height > cc.Canvas.instance.designResolution.width) {
             //         uiFunc.openUI("uiMatchingVer", function(obj) {
@@ -50,32 +59,13 @@ export default class uiLobbyPanel extends UIBase {
             // } else {
             //     cc.director.loadScene('game');
             // }
-        } else if (window.GLB.gameType === window.GLB.COMPETITION) {
-            if (window.GLB.MAX_PLAYER_COUNT === 2) {
-                // if (cc.Canvas.instance.designResolution.height > cc.Canvas.instance.designResolution.width) {
-                //     uiFunc.openUI("uiMatching1v1Ver", function(obj) {
-                //         var matching = obj.getComponent("uiMatching1v1Ver");
-                //         matching.joinRandomRoom();
-                //     });
-                // } else {
-                    UIManager.Instance().openUI("uiMatching1v1", function(obj) {
-                        let matching = obj.getComponent("uiMatching1v1");
-                        matching.joinRandomRoom();
-                    });
-                // }
-            // } else if (GLB.MAX_PLAYER_COUNT === 4) {
-            //     if (cc.Canvas.instance.designResolution.height > cc.Canvas.instance.designResolution.width) {
-            //         uiFunc.openUI("uiMatching2v2Ver", function(obj) {
-            //             var matching = obj.getComponent("uiMatching2v2Ver");
-            //             matching.joinRandomRoom();
-            //         });
-            //     } else {
-            //         uiFunc.openUI("uiMatching2v2Ver", function(obj) {
-            //             var matching = obj.getComponent("uiMatching2v2Ver");
-            //             matching.joinRandomRoom();
-            //         });
-            //     }
+        } else if (G.GLB.gameType === G.GLB.COMPETITION) {
+            if (G.GLB.MAX_PLAYER_COUNT === 2) {
+                UIManager.Instance().openUI("uiMatching1v1", function(obj) {
+                    let matching = obj.getComponent("uiMatching1v1");
+                    matching.joinRandomRoom();
+                });
             }
         }
-    },
+    }
 }

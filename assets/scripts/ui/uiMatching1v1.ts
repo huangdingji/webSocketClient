@@ -2,6 +2,9 @@
 @desc: 1V1匹配
 */
 import UIBase from "../base/UIBase";
+import GEventDispatch from "../common/GEventDispatch";
+import G from "../common/Globals";
+import UIManager from "../common/UIManager";
 let mvs = require("../network/Matchvs");
 
 const { ccclass, property } = cc._decorator;
@@ -10,34 +13,45 @@ const { ccclass, property } = cc._decorator;
 export default class uiMatching1v1 extends UIBase {
     onLoad() { 
         super.onLoad();
-        window.clientEvent.on(clientEvent.eventType.joinRoomResponse, this.joinRoomResponse, this);
-        window.clientEvent.on(clientEvent.eventType.joinOverResponse, this.joinOverResponse, this);
+        this.nodeDict["quit"].on("click", this.leaveRoom, this);
     }
 
     start() {
 
     }
 
+    onEnable() {
+        GEventDispatch.Instance().on(G.eventType.joinRoomResponse, this.joinRoomResponse, this);
+        GEventDispatch.Instance().on(G.eventType.joinOverResponse, this.joinOverResponse, this);
+        GEventDispatch.Instance().on(G.eventType.leaveRoomResponse, this.leaveRoomResponse, this);
+    }
+
+    onDisable() {
+        GEventDispatch.Instance().off(G.eventType.joinRoomResponse, this);
+        GEventDispatch.Instance().off(G.eventType.joinOverResponse, this);
+        GEventDispatch.Instance().off(G.eventType.leaveRoomResponse, this);
+    }
+
+    onDestroy() {
+
+    }
+
+    /*
+    @desc: 进入随机房间请求
+    */
     joinRandomRoom() {
         let result = null;
-        if (window.GLB.matchType === window.GLB.RANDOM_MATCH) {
-            result = mvs.engine.joinRandomRoom(window.GLB.MAX_PLAYER_COUNT, '');
+        if (G.GLB.matchType === G.GLB.RANDOM_MATCH) {
+            result = mvs.engine.joinRandomRoom(G.GLB.MAX_PLAYER_COUNT, '');
             if (result !== 0) {
                 console.log('进入房间失败,错误码:' + result);
             }
-        // } else if (GLB.matchType === GLB.PROPERTY_MATCH) {
-        //     let matchinfo = new mvs.MatchInfo();
-        //     matchinfo.maxPlayer = GLB.MAX_PLAYER_COUNT;
-        //     matchinfo.mode = 0;
-        //     matchinfo.canWatch = 0;
-        //     matchinfo.tags = GLB.tagsInfo;
-        //     result = mvs.engine.joinRoomWithProperties(matchinfo, "joinRoomWithProperties");
-        //     if (result !== 0) {
-        //         console.log('进入房间失败,错误码:' + result);
-        //     }
         }
     }
 
+    /*
+    @desc: 进入随机房间回调
+    */
     joinRoomResponse(data) {
         if (data.status !== 200) {
             console.log('进入房间失败,异步回调错误码: ' + data.status);
@@ -45,37 +59,23 @@ export default class uiMatching1v1 extends UIBase {
             console.log('进入房间成功');
             console.log('房间号: ' + data.roomInfo.roomID);
         }
-        window.GLB.roomId = data.roomInfo.roomID;
-        let userIds = [window.GLB.userInfo.id]
+        G.GLB.roomId = data.roomInfo.roomID;
+        let userIds = [G.GLB.userInfo.id]
         console.log('房间用户: ' + userIds);
 
-        // let playerIcon = null;
         for (let j = 0; j < data.roomUserInfoList.length; j++) {
-            // playerIcon = this.playerIcons[j].getComponent('playerIcon');
-            // if (playerIcon && !playerIcon.userInfo) {
-                // playerIcon.setData(data.roomUserInfoList[j]);
-                if (GLB.userInfo.id !== data.roomUserInfoList[j].userId) {
-                    userIds.push(data.roomUserInfoList[j].userId);
-                }
-            // }
+            if (GLB.userInfo.id !== data.roomUserInfoList[j].userId) {
+                userIds.push(data.roomUserInfoList[j].userId);
+            }
         }
-
-        // for (let i = 0; i < this.playerIcons.length; i++) {
-        //     playerIcon = this.playerIcons[i].getComponent('playerIcon');
-        //     if (playerIcon && !playerIcon.userInfo) {
-        //         playerIcon.setData(GLB.userInfo);
-        //         break;
-        //     }
-        // }
-        window.GLB.playerUserIds = userIds;
-        if (userIds.length >= window.GLB.MAX_PLAYER_COUNT) {
-            let result = mvs.engine.joinOver("");
+        G.GLB.playerUserIds = userIds;
+        if (userIds.length >= G.GLB.MAX_PLAYER_COUNT) {
+            let result = mvs.engine.joinOver(""); // 发送所有玩家都加入房间
             console.log("发出关闭房间的通知");
             if (result !== 0) {
                 console.log("关闭房间失败，错误码：", result);
             }
-
-            window.GLB.playerUserIds = userIds;
+            G.GLB.playerUserIds = userIds;
         }
     }
 
@@ -89,11 +89,36 @@ export default class uiMatching1v1 extends UIBase {
     }
 
     notifyGameStart() {
-        window.GLB.isRoomOwner = true;
+        G.GLB.isRoomOwner = true;
         let msg = {
-            action: window.GLB.GAME_START_EVENT,
-            userIds: window.GLB.playerUserIds
+            action: G.GLB.GAME_START_EVENT,
+            userIds: G.GLB.playerUserIds
         };
-        window.Game.GameManager.sendEventEx(msg);
+        G.Game.GameManager.sendEventEx(msg);
     }
+
+    leaveRoom() {
+        mvs.engine.leaveRoom();
+        UIManager.Instance().closeUI(this.node.name);
+        this.node.destroy();
+    }
+
+    leaveRoomResponse(data) {
+        if (data.leaveRoomRsp.status === 200) {
+            console.log("离开房间成功");
+            for (var i = 0; i < this.playerIcons.length; i++) {
+                var playerIcon = this.playerIcons[i].getComponent('playerIcon');
+                if (playerIcon) {
+                    playerIcon.init();
+                    break;
+                }
+            }
+            uiFunc.closeUI(this.node.name);
+            this.node.destroy();
+        } else {
+            console.log("离开房间失败");
+        }
+    }
+
+    
 }

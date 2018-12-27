@@ -4,6 +4,7 @@ import GEventDispatch from "./GEventDispatch";
 import NetManager from "./NetManager";
 import RoleManager from "./RoleManager";
 import UIManager from "./UIManager";
+import G from "./Globals";
 let mvs = require("../network/Matchvs");
 
 /*
@@ -13,8 +14,10 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class GameManager extends cc.Component {
+    readyCnt = 0;  // 准备玩家数量
+    gameState = G.GameState.None; // 当前游戏状态
     start() {
-        window.Game.GameManager = this;
+        G.Game.GameManager = this;
         cc.game.addPersistRootNode(this.node);
 
         // 初始化管理器
@@ -26,11 +29,10 @@ export default class GameManager extends cc.Component {
         UIManager.Instance();
 
         // 分发系统
-        window.clientEvent.init();
+        // window.clientEvent.init();
 
         // 网络系统
         window.network.chooseNetworkMode();
-        // network.chooseNetworkMode();
 
         // ui系统
         UIManager.Instance().openUI("uiLogin");
@@ -44,10 +46,11 @@ export default class GameManager extends cc.Component {
         mvs.response.logoutResponse = this.logoutResponse.bind(this); // 用户退出登录的回调
         mvs.response.createRoomResponse = this.createRoomResponse.bind(this); // 创建房间回调
         mvs.response.joinRoomResponse = this.joinRoomResponse.bind(this);  // 加入房间回调
+        mvs.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
         mvs.response.sendEventNotify = this.sendEventNotify.bind(this);  // 玩家自定义行为通知
         mvs.response.joinOverResponse = this.joinOverResponse.bind(this);  // 当前的房间已经满了
-        mvs.response.frameUpdate = this.frameUpdate.bind(this);
-        let result = mvs.engine.init(mvs.response, window.GLB.channel, window.GLB.platform, window.GLB.gameId);
+        mvs.response.frameUpdate = this.frameUpdate.bind(this);          // 帧同步
+        let result = mvs.engine.init(mvs.response, G.GLB.channel, G.GLB.platform, G.GLB.gameId);
         if (result !== 0) {
             console.log('初始化失败,错误码:' + result);
         }
@@ -69,9 +72,12 @@ export default class GameManager extends cc.Component {
         console.log("错误信息：" + msg);
     }
 
+    /*
+    @desc: 初始化回调 1
+    */
     initResponse() {
         console.log('初始化成功，开始注册用户');
-        var result = mvs.engine.registerUser();
+        let result = mvs.engine.registerUser();
         if (result !== 0) {
             console.log('注册用户失败，错误码:' + result);
         } else {
@@ -79,20 +85,21 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    /*
+    @desc: 注册用户回调 2
+    */
     registerUserResponse(userInfo) {
-        var deviceId = 'abcdef';
-        var gatewayId = 0;
-        window.GLB.userInfo = userInfo;
-
+        let deviceId = 'abcdef';
+        let gatewayId = 0;
+        G.GLB.userInfo = userInfo;
         console.log('开始登录,用户Id:' + userInfo.id)
-
-        var result = mvs.engine.login(
+        let result = mvs.engine.login(
             userInfo.id,
             userInfo.token,
-            window.GLB.gameId,
-            window.GLB.gameVersion,
-            window.GLB.appKey,
-            window.GLB.secret,
+            G.GLB.gameId,
+            G.GLB.gameVersion,
+            G.GLB.appKey,
+            G.GLB.secret,
             deviceId,
             gatewayId
         );
@@ -101,6 +108,9 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    /*
+    @desc: 登录回调 3
+    */
     loginResponse(info) {
         if (info.status !== 200) {
             console.log('登录失败,异步回调错误码:' + info.status);
@@ -110,6 +120,36 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    /*
+    @desc: 进入随机房间回调 4
+    */
+    joinRoomResponse(status, roomUserInfoList, roomInfo) {
+        if (status !== 200) {
+            console.log("失败 joinRoomResponse:" + status);
+            return;
+        }
+        let data = {
+            status: status,
+            roomUserInfoList: roomUserInfoList,
+            roomInfo: roomInfo
+        }
+        GEventDispatch.Instance().emit(G.eventType.joinRoomResponse, data);
+    }
+
+    /*
+    @desc: 当前的房间已经满了 5
+    */
+    joinOverResponse(joinOverRsp) {
+        if (joinOverRsp.status !== 200) {
+            console.log("失败 joinOverRsp:" + joinOverRsp);
+            return;
+        }
+        var data = {
+            joinOverRsp: joinOverRsp
+        }
+        GEventDispatch.Instance().emit(G.eventType.joinOverResponse, data);
+    }
+
     logoutResponse(status) {
         window.network.disconnect();
         console.log("reload lobby");
@@ -117,8 +157,11 @@ export default class GameManager extends cc.Component {
         cc.director.loadScene('lobby');
     }
 
+    /*
+    @desc: 显示主界面
+    */
     lobbyShow() {
-        UIManager.Instance().closeUI("uiLogin");
+        UIManager.Instance().closeUI("uiLogin", null, true);
         UIManager.Instance().openUI("uiLobbyPanel");
     }
 
@@ -133,58 +176,50 @@ export default class GameManager extends cc.Component {
         window.clientEvent.dispatch(window.clientEvent.eventType.createRoomResponse, data);
     }
 
-    joinRoomResponse(status, roomUserInfoList, roomInfo) {
-        if (status !== 200) {
-            console.log("失败 joinRoomResponse:" + status);
+
+    
+
+    leaveRoomResponse(leaveRoomRsp) {
+        if (leaveRoomRsp.status !== 200) {
+            console.log("失败 leaveRoomRsp:" + leaveRoomRsp);
             return;
         }
         let data = {
-            status: status,
-            roomUserInfoList: roomUserInfoList,
-            roomInfo: roomInfo
+            leaveRoomRsp: leaveRoomRsp
         }
-        window.clientEvent.dispatch(clientEvent.eventType.joinRoomResponse, data);
+        GEventDispatch.Instance().emit(G.eventType.this.leaveRoomResponse, data);
     }
 
-    joinOverResponse(joinOverRsp) {
-        if (joinOverRsp.status !== 200) {
-            console.log("失败 joinOverRsp:" + joinOverRsp);
-            return;
-        }
-        var data = {
-            joinOverRsp: joinOverRsp
-        }
-        window.clientEvent.dispatch(clientEvent.eventType.joinOverResponse, data);
-    }
+    
 
     // 玩家行为通知
     sendEventNotify(info) {
         console.log("sendEventNotify" + info);
         var cpProto = JSON.parse(info.cpProto);
-        if (info.cpProto.indexOf(GLB.GAME_START_EVENT) >= 0) {
-            GLB.playerUserIds = [GLB.userInfo.id];
+        if (info.cpProto.indexOf(G.GLB.GAME_START_EVENT) >= 0) {
+            G.GLB.playerUserIds = [G.GLB.userInfo.id];
             var remoteUserIds = JSON.parse(info.cpProto).userIds;
             remoteUserIds.forEach(function (id) {
-                if (GLB.userInfo.id !== id) {
-                    GLB.playerUserIds.push(id);
+                if (G.GLB.userInfo.id !== id) {
+                    G.GLB.playerUserIds.push(id);
                 }
             });
             this.startGame();
         }
 
-        if (info.cpProto.indexOf(GLB.GAME_OVER_EVENT) >= 0) {
-            this.gameOver();
+        if (info.cpProto.indexOf(G.GLB.GAME_OVER_EVENT) >= 0) {
+            // this.gameOver();
         }
 
-        if (info.cpProto.indexOf(GLB.READY) >= 0) {
+        if (info.cpProto.indexOf(G.GLB.READY) >= 0) {
             this.readyCnt++;
-            if (GLB.isRoomOwner && this.readyCnt >= GLB.playerUserIds.length) {
+            if (G.GLB.isRoomOwner && this.readyCnt >= G.GLB.playerUserIds.length) {
                 this.sendRoundStartMsg();
             }
         }
 
-        if (info.cpProto.indexOf(GLB.ROUND_START) >= 0) {
-            window.Game.GameManager.gameState = window.GameState.Play;
+        if (info.cpProto.indexOf(G.GLB.ROUND_START) >= 0) {
+            G.Game.GameManager.gameState = G.GameState.Play;
             // setTimeout(function () {
             //     Game.GameManager.gameState = GameState.Play;
             //     this.timeUpdate();
@@ -194,7 +229,11 @@ export default class GameManager extends cc.Component {
     }
 
     frameUpdate(rsp) {
-        console.log("frameUpdate", rsp);
+        // for (let index = 0; index < rsp.frameItems.length; index++) {
+        // }
+        if (rsp.frameItems.length > 0) {
+            console.log(rsp);
+        }
         // for (var i = 0; i < rsp.frameItems.length; i++) {
         //     if (Game.GameManager.gameState === GameState.Over) {
         //         return;
@@ -261,8 +300,8 @@ export default class GameManager extends cc.Component {
     }
 
     startGame() {
-        // this.readyCnt = 0;
-        // this.gameState = window.GameState.None;
+        this.readyCnt = 0;
+        this.gameState = G.GameState.None;
         // this.rivalScore = 0;
         // this.selfScore = 0;
         // this.isRivalLeave = false;
@@ -274,8 +313,8 @@ export default class GameManager extends cc.Component {
             }.bind(this));
         }.bind(this));
 
-        if (window.GLB.syncFrame === true && window.GLB.isRoomOwner === true) {
-            let result = mvs.engine.setFrameSync(window.GLB.FRAME_RATE);
+        if (G.GLB.syncFrame === true && G.GLB.isRoomOwner === true) {
+            let result = mvs.engine.setFrameSync(G.GLB.FRAME_RATE);
             if (result !== 0) {
                 console.log('设置帧同步率失败,错误码:' + result);
             }
@@ -283,12 +322,12 @@ export default class GameManager extends cc.Component {
     }
 
     sendReadyMsg() {
-        let msg = {action: window.GLB.READY};
+        let msg = {action: G.GLB.READY};
         this.sendEventEx(msg);
     }
 
     sendRoundStartMsg() {
-        let msg = {action: window.GLB.ROUND_START};
+        let msg = {action: G.GLB.ROUND_START};
         this.sendEventEx(msg);
     }
 
@@ -296,12 +335,12 @@ export default class GameManager extends cc.Component {
         if (rsp.mStatus !== 200) {
             console.log('设置同步帧率失败，status=' + rsp.status);
         } else {
-            console.log('设置同步帧率成功, 帧率为:' + window.GLB.FRAME_RATE);
+            console.log('设置同步帧率成功, 帧率为:' + G.GLB.FRAME_RATE);
         }
     }
 
     sendEventEx(msg) {
-        let result = mvs.engine.sendEventEx(0, JSON.stringify(msg), 0, window.GLB.playerUserIds);
+        let result = mvs.engine.sendEventEx(0, JSON.stringify(msg), 0, G.GLB.playerUserIds);
         if (result.result !== 0) {
             console.log("sendEventEx", msg.action, result.result);
         }

@@ -38,11 +38,20 @@ export default class uiGamePanel extends UIBase {
 
     sendDirectMsg(direction) {
         // if (window.Game.GameManager.gameState === window.GameState.Play) {
-            mvs.engine.sendFrameEvent(JSON.stringify({
-                action: window.GLB.DIRECTION,
-                direction: direction
-            }));
+            // mvs.engine.sendFrameEvent(JSON.stringify({
+            //     action: window.GLB.DIRECTION,
+            //     direction: direction
+            // }));
         // }
+
+        mvs.engine.sendFrameEvent(JSON.stringify({
+            action: window.GLB.DIRECTION,
+            direction: window.DirectState.Left,
+        }));
+        mvs.engine.sendFrameEvent(JSON.stringify({
+            action: window.GLB.DIRECTION,
+            direction: window.DirectState.Right,
+        }));
     }
 
     // update (dt) {}

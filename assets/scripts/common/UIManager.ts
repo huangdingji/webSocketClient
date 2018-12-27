@@ -42,11 +42,10 @@ export default class UIManager {
                 if (callBack) {
                     callBack(temp);
                 }
-                // clientEvent.dispatch(clientEvent.eventType.openUI);
                 return;
             }
         }
-        // 非缓存--
+        // 非缓存
         cc.loader.loadRes('Perfab/' + uiName, function (err, prefab) {
             if (err) {
                 cc.error(err.message || err);
@@ -62,7 +61,6 @@ export default class UIManager {
             if (callBack) {
                 callBack(temp);
             }
-            // clientEvent.dispatch(clientEvent.eventType.openUI);
         });
     }
 
@@ -70,20 +68,24 @@ export default class UIManager {
     @desc: 关闭ui控件
     @uiName: 控件名称
     @callBack: 回调 
+    @bDestroy: 是否删掉UI
     */
-    closeUI(uiName, callBack = null) {
+    closeUI(uiName, callBack = null, bDestroy = false) {
         for (let i = this.uiList.length - 1; i >= 0; i--) {
             let temp = this.uiList[i];
             if (temp && temp.name === uiName) {
                 temp.active = false;
                 temp.removeFromParent(false);
-                this.cacheUIList.push(temp);
                 this.uiList.splice(i, 1);
                 let panel = temp.getComponent("UIBase");
                 if (panel) {
                     panel.hide();
                 }
-                // clientEvent.dispatch(clientEvent.eventType.closeUI);
+                if (bDestroy) {
+                    temp.destroy();
+                } else {
+                    this.cacheUIList.push(temp);
+                }
                 if (callBack) {
                     callBack();
                 }
