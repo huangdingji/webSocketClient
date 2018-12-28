@@ -5,6 +5,7 @@ import NetManager from "./NetManager";
 import RoleManager from "./RoleManager";
 import UIManager from "./UIManager";
 import G from "./Globals";
+import AssetManager from "./AssetManager";
 let mvs = require("../network/Matchvs");
 
 /*
@@ -27,6 +28,7 @@ export default class GameManager extends cc.Component {
         NetManager.Instance();
         RoleManager.Instance();
         UIManager.Instance();
+        AssetManager.Instance();
 
         // 分发系统
         // window.clientEvent.init();

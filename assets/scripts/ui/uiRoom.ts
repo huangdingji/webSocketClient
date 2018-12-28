@@ -71,20 +71,20 @@ export default class uiRoom extends UIBase {
         }
 
 
-        if (playerCnt === window.GLB.MAX_PLAYER_COUNT) {
+        if (playerCnt === G.GLB.MAX_PLAYER_COUNT) {
             var result = mvs.engine.joinOver("");
             console.log("发出关闭房间的通知");
             if (result !== 0) {
                 console.log("关闭房间失败，错误码：", result);
             }
 
-            window.GLB.playerUserIds = userIds;
+            G.GLB.playerUserIds = userIds;
 
             var msg = {
-                action: window.GLB.GAME_START_EVENT,
+                action: G.GLB.GAME_START_EVENT,
                 userIds: userIds
             };
-            window.Game.GameManager.sendEventEx(msg);
+            G.Game.GameManager.sendEventEx(msg);
         // } else {
         //     uiFunc.openUI("uiTip", function(obj) {
         //         var uiTip = obj.getComponent("uiTip");

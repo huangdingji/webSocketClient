@@ -4,6 +4,7 @@
 
 import UIBase from "../base/UIBase";
 import G from "../common/Globals";
+import AssetManager from "../common/AssetManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -15,6 +16,15 @@ export default class uiLogin extends UIBase {
     }
 
     start () {
+        let bg = cc.find("bg/bot-bg", this.node);
+        AssetManager.Instance().setSpriteFrame(bg, "textures/game/background");
+        setTimeout(function(){
+            AssetManager.Instance().setSpriteFrame(bg, "textures/lobby/ready");
+        }, 2000);
+
+        setTimeout(function(){
+            AssetManager.Instance().setSpriteFrame(bg, "textures/game/background");
+        }, 4000);
     }
 
     onEnable() {
