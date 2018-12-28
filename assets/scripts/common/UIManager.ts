@@ -46,7 +46,7 @@ export default class UIManager {
             }
         }
         // 非缓存
-        cc.loader.loadRes('Perfab/' + uiName, function (err, prefab) {
+        cc.loader.loadRes('perfabs/' + uiName, function (err, prefab) {
             if (err) {
                 cc.error(err.message || err);
                 return;

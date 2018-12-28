@@ -77,6 +77,7 @@ export default class GameManager extends cc.Component {
     */
     initResponse() {
         console.log('初始化成功，开始注册用户');
+        cc.sys.localStorage.removeItem("regUserInfoMatchVSalpha");
         let result = mvs.engine.registerUser();
         if (result !== 0) {
             console.log('注册用户失败，错误码:' + result);

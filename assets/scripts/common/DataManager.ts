@@ -47,5 +47,4 @@ export default class DataManager {
     getData(key) {
         return this.mData[key];
     }
-
 }
