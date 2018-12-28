@@ -3,6 +3,7 @@
 */
 import WsSocket from "./WsSocket";
 import GEventDispatch from "./GEventDispatch";
+import Http from "./Http";
 
 const { ccclass, property } = cc._decorator;
 
@@ -17,8 +18,10 @@ export default class NetManager {
     }
 
     gameSocket: WsSocket;
+    gameHttp: Http;
 
     constructor() {
+        this.gameHttp = new Http();
     }
 
     /*
@@ -89,6 +92,17 @@ export default class NetManager {
         } else {
             GEventDispatch.Instance().emit(response.type.toString(), JSON.parse(response.msg));
         }
+    }
+
+    /*
+    @desc: 发送http请求
+    @url: 地址
+    @callback: 回调,onMsg成功,onErr失败
+    @isPost: 是否使用post或者get,post发送可以带参数
+    @params: 参数
+    */
+    SendHttpRequest(url, callback, isPost?, params?) {
+        this.gameHttp.send(url, callback, isPost, params);
     }
 };
 

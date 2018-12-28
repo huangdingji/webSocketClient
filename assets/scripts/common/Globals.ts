@@ -75,7 +75,7 @@ export default class G {
         isRoomOwner: false,
     
         syncFrame: true,
-        FRAME_RATE: 10,
+        FRAME_RATE: 15,
     
         NormalBulletSpeed: 1000,
         limitX: 505,

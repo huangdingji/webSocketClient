@@ -50,6 +50,7 @@ export default class FrameManager {
     @desc: 收到帧；服务1s发15帧，客户端1s更新60帧，因此客户端每接收到服务1帧要插入3帧
     */
     onReceiveFrame(frame) {
+        frame["FrameId"] = 1;
         this.frameArray.push(frame);
         for (let i = 0; i < this.fillFrameNum; i++) {
             let nullFrame = {};

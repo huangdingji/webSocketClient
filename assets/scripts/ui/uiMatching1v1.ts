@@ -64,7 +64,7 @@ export default class uiMatching1v1 extends UIBase {
         console.log('房间用户: ' + userIds);
 
         for (let j = 0; j < data.roomUserInfoList.length; j++) {
-            if (GLB.userInfo.id !== data.roomUserInfoList[j].userId) {
+            if (G.GLB.userInfo.id !== data.roomUserInfoList[j].userId) {
                 userIds.push(data.roomUserInfoList[j].userId);
             }
         }
@@ -79,6 +79,9 @@ export default class uiMatching1v1 extends UIBase {
         }
     }
 
+    /*
+    @desc: 所有玩家进入房间，关闭房间回调
+    */
     joinOverResponse(data) {
         if (data.joinOverRsp.status === 200) {
             console.log("关闭房间成功");
@@ -88,6 +91,9 @@ export default class uiMatching1v1 extends UIBase {
         }
     }
 
+    /*
+    @desc: 通知开始游戏
+    */
     notifyGameStart() {
         G.GLB.isRoomOwner = true;
         let msg = {
@@ -97,28 +103,33 @@ export default class uiMatching1v1 extends UIBase {
         G.Game.GameManager.sendEventEx(msg);
     }
 
+    /*
+    @desc: 离开房间
+    */
     leaveRoom() {
         mvs.engine.leaveRoom();
-        UIManager.Instance().closeUI(this.node.name);
-        this.node.destroy();
+        // UIManager.Instance().closeUI(this.node.name);
+        // this.node.destroy();
     }
 
+    /*
+    @desc: 离开房间回调
+    */
     leaveRoomResponse(data) {
         if (data.leaveRoomRsp.status === 200) {
             console.log("离开房间成功");
-            for (var i = 0; i < this.playerIcons.length; i++) {
-                var playerIcon = this.playerIcons[i].getComponent('playerIcon');
-                if (playerIcon) {
-                    playerIcon.init();
-                    break;
-                }
-            }
-            uiFunc.closeUI(this.node.name);
-            this.node.destroy();
+            // for (var i = 0; i < this.playerIcons.length; i++) {
+            //     var playerIcon = this.playerIcons[i].getComponent('playerIcon');
+            //     if (playerIcon) {
+            //         playerIcon.init();
+            //         break;
+            //     }
+            // }
+            // uiFunc.closeUI(this.node.name);
+            // this.node.destroy();
+            UIManager.Instance().closeUI(this.node.name);
         } else {
             console.log("离开房间失败");
         }
     }
-
-    
 }

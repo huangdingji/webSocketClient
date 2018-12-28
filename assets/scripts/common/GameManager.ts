@@ -32,7 +32,7 @@ export default class GameManager extends cc.Component {
         // window.clientEvent.init();
 
         // 网络系统
-        window.network.chooseNetworkMode();
+        // window.network.chooseNetworkMode();
 
         // ui系统
         UIManager.Instance().openUI("uiLogin");
@@ -46,7 +46,7 @@ export default class GameManager extends cc.Component {
         mvs.response.logoutResponse = this.logoutResponse.bind(this); // 用户退出登录的回调
         mvs.response.createRoomResponse = this.createRoomResponse.bind(this); // 创建房间回调
         mvs.response.joinRoomResponse = this.joinRoomResponse.bind(this);  // 加入房间回调
-        mvs.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
+        mvs.response.leaveRoomResponse = this.leaveRoomResponse.bind(this); // 离开房间回调
         mvs.response.sendEventNotify = this.sendEventNotify.bind(this);  // 玩家自定义行为通知
         mvs.response.joinOverResponse = this.joinOverResponse.bind(this);  // 当前的房间已经满了
         mvs.response.frameUpdate = this.frameUpdate.bind(this);          // 帧同步
@@ -150,8 +150,11 @@ export default class GameManager extends cc.Component {
         GEventDispatch.Instance().emit(G.eventType.joinOverResponse, data);
     }
 
+    /*
+    @desc: 登出回调
+    */
     logoutResponse(status) {
-        window.network.disconnect();
+        // window.network.disconnect();
         console.log("reload lobby");
         cc.game.removePersistRootNode(this.node);
         cc.director.loadScene('lobby');
@@ -165,6 +168,9 @@ export default class GameManager extends cc.Component {
         UIManager.Instance().openUI("uiLobbyPanel");
     }
 
+    /*
+    @desc: 创建房间回调
+    */
     createRoomResponse(rsp) {
         if (rsp.status !== 200) {
             console.log("失败 createRoomResponse:" + rsp);
@@ -173,12 +179,14 @@ export default class GameManager extends cc.Component {
         let data = {
             rsp: rsp
         };
-        window.clientEvent.dispatch(window.clientEvent.eventType.createRoomResponse, data);
+        GEventDispatch.Instance().emit(G.eventType.createRoomResponse, data);
     }
 
 
     
-
+    /*
+    @desc: 离开房间回调
+    */
     leaveRoomResponse(leaveRoomRsp) {
         if (leaveRoomRsp.status !== 200) {
             console.log("失败 leaveRoomRsp:" + leaveRoomRsp);
@@ -187,7 +195,7 @@ export default class GameManager extends cc.Component {
         let data = {
             leaveRoomRsp: leaveRoomRsp
         }
-        GEventDispatch.Instance().emit(G.eventType.this.leaveRoomResponse, data);
+        GEventDispatch.Instance().emit(G.eventType.leaveRoomResponse, data);
     }
 
     
@@ -229,76 +237,12 @@ export default class GameManager extends cc.Component {
     }
 
     frameUpdate(rsp) {
-        // for (let index = 0; index < rsp.frameItems.length; index++) {
-        // }
-        if (rsp.frameItems.length > 0) {
-            console.log(rsp);
-        }
-        // for (var i = 0; i < rsp.frameItems.length; i++) {
-        //     if (Game.GameManager.gameState === GameState.Over) {
-        //         return;
-        //     }
-        //     var info = rsp.frameItems[i];
-        //     var cpProto = JSON.parse(info.cpProto);
-        //     if (info.cpProto.indexOf(GLB.DIRECTION) >= 0) {
-        //         if (GLB.userInfo.id === info.srcUserID) {
-        //             Game.PlayerManager.self.setDirect(cpProto.direction);
-        //         } else {
-        //             Game.PlayerManager.rival.setDirect(cpProto.direction);
-        //         }
-        //     }
-
-        //     if (info.cpProto.indexOf(GLB.FIRE_ANIM) >= 0) {
-        //         if (GLB.userInfo.id === info.srcUserID) {
-        //             Game.PlayerManager.self.firePreAnim();
-        //         } else {
-        //             Game.PlayerManager.rival.firePreAnim();
-        //         }
-        //     }
-
-        //     if (info.cpProto.indexOf(GLB.FIRE_EVENT) >= 0) {
-        //         if (GLB.userInfo.id === info.srcUserID) {
-        //             Game.PlayerManager.self.fireNotify(cpProto.speed);
-        //         } else {
-        //             Game.PlayerManager.rival.fireNotify(cpProto.speed);
-        //         }
-        //     }
-
-        //     if (info.cpProto.indexOf(GLB.GAME_TIME) >= 0) {
-        //         this.gameTime--;
-        //         if (this.gameTime < 0) {
-        //             this.gameTime = 0;
-        //         }
-        //     }
-
-        //     if (info.cpProto.indexOf(GLB.GOAL_EVENT) >= 0) {
-        //         // cpProto.playerId 为受伤方id--
-        //         if (GLB.userInfo.id === cpProto.playerId) {
-        //             Game.PlayerManager.self.hitNotify();
-        //             this.rivalScore++;
-        //         } else {
-        //             Game.PlayerManager.rival.hitNotify();
-        //             this.selfScore++;
-        //         }
-        //         clientEvent.dispatch(clientEvent.eventType.score);
-        //     }
-        // }
-        // if (Game.PlayerManager && Game.PlayerManager.self && Game.PlayerManager.rival) {
-        //     if (Math.abs(Game.PlayerManager.self.targetPosX - Game.PlayerManager.rival.targetPosX) < GLB.playerMinDistance) {
-        //         if (Game.PlayerManager.self.targetPosX < Game.PlayerManager.rival.targetPosX) {
-        //             Game.PlayerManager.self.targetPosX -= GLB.bounceDistance;
-        //             Game.PlayerManager.rival.targetPosX += GLB.bounceDistance;
-        //         } else {
-        //             Game.PlayerManager.self.targetPosX += GLB.bounceDistance;
-        //             Game.PlayerManager.rival.targetPosX -= GLB.bounceDistance;
-        //         }
-        //     }
-        //     Game.PlayerManager.self.move();
-        //     Game.PlayerManager.rival.move();
-
-        // }
+        FrameManager.Instance().onReceiveFrame(rsp);
     }
 
+    /*
+    @desc: 开始游戏，切换游戏场景
+    */
     startGame() {
         this.readyCnt = 0;
         this.gameState = G.GameState.None;
@@ -312,7 +256,7 @@ export default class GameManager extends cc.Component {
                 this.sendReadyMsg();
             }.bind(this));
         }.bind(this));
-
+        console.log(G.GLB.syncFrame, G.GLB.isRoomOwner);
         if (G.GLB.syncFrame === true && G.GLB.isRoomOwner === true) {
             let result = mvs.engine.setFrameSync(G.GLB.FRAME_RATE);
             if (result !== 0) {
@@ -321,11 +265,17 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    /*
+    @desc: 发送准备
+    */
     sendReadyMsg() {
         let msg = {action: G.GLB.READY};
         this.sendEventEx(msg);
     }
 
+    /*
+    @desc: 发送本局开始
+    */
     sendRoundStartMsg() {
         let msg = {action: G.GLB.ROUND_START};
         this.sendEventEx(msg);

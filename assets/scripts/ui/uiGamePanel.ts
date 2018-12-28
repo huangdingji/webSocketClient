@@ -2,6 +2,7 @@
 @desc: 游戏场景
 */
 import UIBase from "../base/UIBase";
+import G from "../common/Globals";
 let mvs = require("../network/Matchvs");
 
 const {ccclass, property} = cc._decorator;
@@ -21,37 +22,28 @@ export default class uiGamePanel extends UIBase {
     }
 
     rightStart() {
-        this.sendDirectMsg(window.DirectState.Right);
+        this.sendDirectMsg(G.DirectState.Right);
     }
 
     rightCancel() {
-        this.sendDirectMsg(window.DirectState.None);
+        this.sendDirectMsg(G.DirectState.None);
     }
 
     leftStart() {
-        this.sendDirectMsg(window.DirectState.Left);
+        this.sendDirectMsg(G.DirectState.Left);
     }
 
     leftCancel() {
-        this.sendDirectMsg(window.DirectState.None);
+        this.sendDirectMsg(G.DirectState.None);
     }
 
     sendDirectMsg(direction) {
-        // if (window.Game.GameManager.gameState === window.GameState.Play) {
-            // mvs.engine.sendFrameEvent(JSON.stringify({
-            //     action: window.GLB.DIRECTION,
-            //     direction: direction
-            // }));
-        // }
-
-        mvs.engine.sendFrameEvent(JSON.stringify({
-            action: window.GLB.DIRECTION,
-            direction: window.DirectState.Left,
-        }));
-        mvs.engine.sendFrameEvent(JSON.stringify({
-            action: window.GLB.DIRECTION,
-            direction: window.DirectState.Right,
-        }));
+        if (G.Game.GameManager.gameState === G.GameState.Play) {
+            mvs.engine.sendFrameEvent(JSON.stringify({
+                action: G.GLB.DIRECTION,
+                direction: direction
+            }));
+        }
     }
 
     // update (dt) {}

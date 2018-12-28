@@ -2,6 +2,7 @@
 @desc: 房间
 */
 import UIBase from "../base/UIBase";
+import G from "../common/Globals";
 let mvs = require("../network/Matchvs");
 
 const {ccclass, property} = cc._decorator;
@@ -27,7 +28,7 @@ export default class uiRoom extends UIBase {
         this.ownerId = rsp.owner;
         this.players[0] = this.ownerId;
         // this.players[0].setData(this.ownerId, this.ownerId);
-        window.GLB.isRoomOwner = true;
+        G.GLB.isRoomOwner = true;
         // this.refreshStartBtn();
     }
 
