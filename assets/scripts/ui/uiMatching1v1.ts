@@ -5,7 +5,8 @@ import UIBase from "../base/UIBase";
 import GEventDispatch from "../common/GEventDispatch";
 import G from "../common/Globals";
 import UIManager from "../common/UIManager";
-let mvs = require("../network/Matchvs");
+import MatchvsManager from "../common/MatchvsManager";
+// let mvs = require("../network/Matchvs");
 
 const { ccclass, property } = cc._decorator;
 
@@ -42,7 +43,7 @@ export default class uiMatching1v1 extends UIBase {
     joinRandomRoom() {
         let result = null;
         if (G.GLB.matchType === G.GLB.RANDOM_MATCH) {
-            result = mvs.engine.joinRandomRoom(G.GLB.MAX_PLAYER_COUNT, '');
+            result = MatchvsManager.Instance().joinRandomRoom();
             if (result !== 0) {
                 console.log('进入房间失败,错误码:' + result);
             }
@@ -70,11 +71,7 @@ export default class uiMatching1v1 extends UIBase {
         }
         G.GLB.playerUserIds = userIds;
         if (userIds.length >= G.GLB.MAX_PLAYER_COUNT) {
-            let result = mvs.engine.joinOver(""); // 发送所有玩家都加入房间
-            console.log("发出关闭房间的通知");
-            if (result !== 0) {
-                console.log("关闭房间失败，错误码：", result);
-            }
+            MatchvsManager.Instance().joinOver();
             G.GLB.playerUserIds = userIds;
         }
     }
@@ -107,9 +104,7 @@ export default class uiMatching1v1 extends UIBase {
     @desc: 离开房间
     */
     leaveRoom() {
-        mvs.engine.leaveRoom();
-        // UIManager.Instance().closeUI(this.node.name);
-        // this.node.destroy();
+        MatchvsManager.Instance().leaveRoom();
     }
 
     /*

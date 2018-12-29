@@ -6,7 +6,7 @@ import RoleManager from "./RoleManager";
 import UIManager from "./UIManager";
 import G from "./Globals";
 import AssetManager from "./AssetManager";
-let mvs = require("../network/Matchvs");
+import MatchvsManager from "./MatchvsManager";
 
 /*
 desc: 游戏管理器
@@ -29,7 +29,7 @@ export default class GameManager extends cc.Component {
         RoleManager.Instance();
         UIManager.Instance();
         AssetManager.Instance();
-
+        MatchvsManager.Instance();
         // 分发系统
         // window.clientEvent.init();
 
@@ -38,24 +38,6 @@ export default class GameManager extends cc.Component {
 
         // ui系统
         UIManager.Instance().openUI("uiLogin");
-    }
-
-    matchVsInit() {
-        mvs.response.errorResponse = this.errorResponse.bind(this); // 错误回调
-        mvs.response.initResponse = this.initResponse.bind(this);  // 初始化回调
-        mvs.response.registerUserResponse = this.registerUserResponse.bind(this); // 注册用户回调
-        mvs.response.loginResponse = this.loginResponse.bind(this); // 用户登录回调
-        mvs.response.logoutResponse = this.logoutResponse.bind(this); // 用户退出登录的回调
-        mvs.response.createRoomResponse = this.createRoomResponse.bind(this); // 创建房间回调
-        mvs.response.joinRoomResponse = this.joinRoomResponse.bind(this);  // 加入房间回调
-        mvs.response.leaveRoomResponse = this.leaveRoomResponse.bind(this); // 离开房间回调
-        mvs.response.sendEventNotify = this.sendEventNotify.bind(this);  // 玩家自定义行为通知
-        mvs.response.joinOverResponse = this.joinOverResponse.bind(this);  // 当前的房间已经满了
-        mvs.response.frameUpdate = this.frameUpdate.bind(this);          // 帧同步
-        let result = mvs.engine.init(mvs.response, G.GLB.channel, G.GLB.platform, G.GLB.gameId);
-        if (result !== 0) {
-            console.log('初始化失败,错误码:' + result);
-        }
     }
 
     errorResponse(error, msg) {
@@ -67,48 +49,24 @@ export default class GameManager extends cc.Component {
                 }
             });
             setTimeout(function () {
-                mvs.engine.logout("");
+                MatchvsManager.Instance().logout();
             }.bind(this), 2500);
         }
-        console.log("错误信息：" + error);
-        console.log("错误信息：" + msg);
+        console.log("错误信息：", error, msg);
     }
 
     /*
     @desc: 初始化回调 1
     */
     initResponse() {
-        console.log('初始化成功，开始注册用户');
-        cc.sys.localStorage.removeItem("regUserInfoMatchVSalpha");
-        let result = mvs.engine.registerUser();
-        if (result !== 0) {
-            console.log('注册用户失败，错误码:' + result);
-        } else {
-            console.log('注册用户成功');
-        }
+        MatchvsManager.Instance().registerUser();
     }
 
     /*
     @desc: 注册用户回调 2
     */
     registerUserResponse(userInfo) {
-        let deviceId = 'abcdef';
-        let gatewayId = 0;
-        G.GLB.userInfo = userInfo;
-        console.log('开始登录,用户Id:' + userInfo.id)
-        let result = mvs.engine.login(
-            userInfo.id,
-            userInfo.token,
-            G.GLB.gameId,
-            G.GLB.gameVersion,
-            G.GLB.appKey,
-            G.GLB.secret,
-            deviceId,
-            gatewayId
-        );
-        if (result !== 0) {
-            console.log('登录失败,错误码:' + result);
-        }
+        MatchvsManager.Instance().registerUserResponse(userInfo);
     }
 
     /*
@@ -157,7 +115,6 @@ export default class GameManager extends cc.Component {
     @desc: 登出回调
     */
     logoutResponse(status) {
-        // window.network.disconnect();
         console.log("reload lobby");
         cc.game.removePersistRootNode(this.node);
         cc.director.loadScene('lobby');
@@ -261,10 +218,7 @@ export default class GameManager extends cc.Component {
         }.bind(this));
         console.log(G.GLB.syncFrame, G.GLB.isRoomOwner);
         if (G.GLB.syncFrame === true && G.GLB.isRoomOwner === true) {
-            let result = mvs.engine.setFrameSync(G.GLB.FRAME_RATE);
-            if (result !== 0) {
-                console.log('设置帧同步率失败,错误码:' + result);
-            }
+            MatchvsManager.Instance().setFrameSync();
         }
     }
 
@@ -293,9 +247,6 @@ export default class GameManager extends cc.Component {
     }
 
     sendEventEx(msg) {
-        let result = mvs.engine.sendEventEx(0, JSON.stringify(msg), 0, G.GLB.playerUserIds);
-        if (result.result !== 0) {
-            console.log("sendEventEx", msg.action, result.result);
-        }
+        MatchvsManager.Instance().sendEventEx(msg);
     }
 }

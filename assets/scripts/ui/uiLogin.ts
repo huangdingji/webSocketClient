@@ -5,6 +5,7 @@
 import UIBase from "../base/UIBase";
 import G from "../common/Globals";
 import AssetManager from "../common/AssetManager";
+import MatchvsManager from "../common/MatchvsManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -12,19 +13,11 @@ const {ccclass, property} = cc._decorator;
 export default class uiLogin extends UIBase {
     onLoad() {
         super.onLoad();
-        this.nodeDict["start"].on("click", G.Game.GameManager.matchVsInit, G.Game.GameManager);
+        // this.nodeDict["start"].on("click", G.Game.GameManager.matchVsInit, G.Game.GameManager);
+        this.nodeDict["start"].on("click", MatchvsManager.Instance().matchVsInit, MatchvsManager.Instance())
     }
 
     start () {
-        let bg = cc.find("bg/bot-bg", this.node);
-        AssetManager.Instance().setSpriteFrame(bg, "textures/game/background");
-        setTimeout(function(){
-            AssetManager.Instance().setSpriteFrame(bg, "textures/lobby/ready");
-        }, 2000);
-
-        setTimeout(function(){
-            AssetManager.Instance().setSpriteFrame(bg, "textures/game/background");
-        }, 4000);
     }
 
     onEnable() {

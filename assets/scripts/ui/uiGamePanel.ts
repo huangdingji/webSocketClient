@@ -3,7 +3,7 @@
 */
 import UIBase from "../base/UIBase";
 import G from "../common/Globals";
-let mvs = require("../network/Matchvs");
+import MatchvsManager from "../common/MatchvsManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -39,12 +39,10 @@ export default class uiGamePanel extends UIBase {
 
     sendDirectMsg(direction) {
         if (G.Game.GameManager.gameState === G.GameState.Play) {
-            mvs.engine.sendFrameEvent(JSON.stringify({
+            MatchvsManager.Instance().sendFrameEvent(JSON.stringify({
                 action: G.GLB.DIRECTION,
                 direction: direction
             }));
         }
     }
-
-    // update (dt) {}
 }

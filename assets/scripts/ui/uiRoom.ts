@@ -3,7 +3,7 @@
 */
 import UIBase from "../base/UIBase";
 import G from "../common/Globals";
-let mvs = require("../network/Matchvs");
+import MatchvsManager from "../common/MatchvsManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -72,14 +72,8 @@ export default class uiRoom extends UIBase {
 
 
         if (playerCnt === G.GLB.MAX_PLAYER_COUNT) {
-            var result = mvs.engine.joinOver("");
-            console.log("发出关闭房间的通知");
-            if (result !== 0) {
-                console.log("关闭房间失败，错误码：", result);
-            }
-
+            MatchvsManager.Instance().joinOver();
             G.GLB.playerUserIds = userIds;
-
             var msg = {
                 action: G.GLB.GAME_START_EVENT,
                 userIds: userIds
