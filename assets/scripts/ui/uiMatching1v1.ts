@@ -6,7 +6,6 @@ import GEventDispatch from "../common/GEventDispatch";
 import G from "../common/Globals";
 import UIManager from "../common/UIManager";
 import MatchvsManager from "../common/MatchvsManager";
-// let mvs = require("../network/Matchvs");
 
 const { ccclass, property } = cc._decorator;
 

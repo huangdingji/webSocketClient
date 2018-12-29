@@ -43,12 +43,12 @@ export default class uiLobbyPanel extends UIBase {
         G.GLB.matchType = G.GLB.RANDOM_MATCH; // 修改匹配方式为随机匹配
         console.log('开始随机匹配');
         if (G.GLB.gameType === G.GLB.COMPETITION) {
-            if (G.GLB.MAX_PLAYER_COUNT === 2) {
+            // if (G.GLB.MAX_PLAYER_COUNT === 2) {
                 UIManager.Instance().openUI("uiMatching1v1", function(obj) {
                     let matching = obj.getComponent("uiMatching1v1");
                     matching.joinRandomRoom();
                 });
-            }
+            // }
         }
     }
 }

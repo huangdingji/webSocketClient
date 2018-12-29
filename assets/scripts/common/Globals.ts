@@ -36,7 +36,7 @@ export default class G {
         PROPERTY_MATCH: 2,
         COOPERATION: 1,
         COMPETITION: 2,
-        MAX_PLAYER_COUNT: 2,
+        MAX_PLAYER_COUNT: 1,
         PLAYER_COUNTS: [2],
     
         GAME_START_EVENT: "gameStart",

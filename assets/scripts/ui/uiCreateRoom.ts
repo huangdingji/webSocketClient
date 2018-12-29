@@ -5,7 +5,6 @@ import UIBase from "../base/UIBase";
 import UIManager from "../common/UIManager";
 import G from "../common/Globals";
 import GEventDispatch from "../common/GEventDispatch";
-let mvs = require("../network/Matchvs");
 
 const {ccclass, property} = cc._decorator;
 
@@ -29,20 +28,20 @@ export default class uiCreateRoom extends UIBase {
     }
 
     createRoom() {
-        let create = new mvs.CreateRoomInfo();
+        // let create = new mvs.CreateRoomInfo();
         // create.roomName = this.nodeDict["roomName"].getComponent(cc.EditBox).string;
-        create.roomName = "1";
-        // GLB.MAX_PLAYER_COUNT = this.playerCnt;
-        G.GLB.MAX_PLAYER_COUNT = 2;
-        create.maxPlayer = G.GLB.MAX_PLAYER_COUNT;
-        create.mode = 0;
-        create.canWatch = 0;
-        create.visibility = 1;
-        create.roomProperty = G.GLB.MAX_PLAYER_COUNT;
-        let result = mvs.engine.createRoom(create, { maxPlayer: G.GLB.MAX_PLAYER_COUNT });
-        if (result !== 0) {
-            console.log('创建房间失败,错误码:' + result);
-        }
+        // create.roomName = "1";
+        // // GLB.MAX_PLAYER_COUNT = this.playerCnt;
+        // G.GLB.MAX_PLAYER_COUNT = 2;
+        // create.maxPlayer = G.GLB.MAX_PLAYER_COUNT;
+        // create.mode = 0;
+        // create.canWatch = 0;
+        // create.visibility = 1;
+        // create.roomProperty = G.GLB.MAX_PLAYER_COUNT;
+        // let result = mvs.engine.createRoom(create, { maxPlayer: G.GLB.MAX_PLAYER_COUNT });
+        // if (result !== 0) {
+        //     console.log('创建房间失败,错误码:' + result);
+        // }
     }
 
     createRoomResponse(data) {
